@@ -23,14 +23,16 @@ https://github.com/StayHomeLabNet/Notemod-selfhosted
 This app is a helper tool to speed up everyday copy/paste workflows **without relying on external services**.  
 The purpose of this project is summarized in the first lines of this README:
 
-> A Windows **system-tray resident** clipboard sender.  
-> Its goal is to let you send your clipboard contents to a configured destination as quickly as possible.
+- A Windows **system-tray resident** clipboard sender.  
+- Its goal is to let you send your clipboard contents to a configured destination as quickly as possible.
 
 When used together with Notemod-selfhosted, these are typical use cases:
 
 - Quickly pass text copied on a PC to another device (iPhone / another PC)
 - Send clipboard contents to a fixed destination (personal notes, a work server, a team endpoint, etc.)
 - Reduce the friction of “finding where to paste”, so you can stay in the flow
+
+![](Notemod-selfhosted.png)
 
 Examples using iPhone Shortcuts:
 
@@ -50,7 +52,7 @@ Examples using iPhone Shortcuts:
 ## Installation
 
 1. Download the latest release from **GitHub Releases**
- - https://github.com/StayHomeLabNet/ClipboardSender/releases
+ - [GitHub Releases](https://github.com/StayHomeLabNet/ClipboardSender/releases)  
 2. Extract and run the `.exe`
 
 - 🇺🇸 [Why the exe file is large (English)](docs/exe_size_en.md)
@@ -68,16 +70,9 @@ The larger file size (~140MB) is expected and intentional.
 - On startup, the app stays in the **system tray**
 - The tray icon indicates whether sending is **enabled / disabled**
 
-> Click actions: Left-click toggles enable/disable, right-click opens the menu.
-
 ### Settings screen
 
-On the bottom row of the Settings screen (left to right):
-
-- **Help** (opens the help page)
-- **App name**
-- **Version**
-- **Website link** (shown to the right of Version)
+![](ClipboardSender.png)
 
 ---
 
@@ -140,6 +135,6 @@ Issues and Pull Requests are welcome.
 
 ## Links
 
-- Web: https://stayhomelab.net/
-- Help: https://stayhomelab.net/ClipboardSender
-- Notemod-selfhosted: https://github.com/StayHomeLabNet/Notemod-selfhosted
+- [Web](https://stayhomelab.net/)  
+- [Help](https://stayhomelab.net/ClipboardSender)  
+- [Notemod-selfhosted](https://github.com/StayHomeLabNet/Notemod-selfhosted)  
