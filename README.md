@@ -137,4 +137,4 @@ Issues and Pull Requests are welcome.
 
 - Web: https://stayhomelab.net/
 - Help: https://stayhomelab.net/ClipboardSender
-
+- Notemod-selfhosted: https://github.com/StayHomeLabNet/Notemod-selfhosted
