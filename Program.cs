@@ -120,7 +120,8 @@ internal static class EmbeddedIcon
 
                 using (stream)
                 {
-                    return new System.Drawing.Icon(stream);
+                    using var ico = new System.Drawing.Icon(stream);
+                    return (System.Drawing.Icon)ico.Clone();
                 }
             }
         }
@@ -148,8 +149,8 @@ internal static class BasicAuth
 
 internal sealed class TrayAppContext : ApplicationContext
 {
-    // ★ここをあなたの GitHub / Docs URL に変更
-    private const string HELP_URL = "https://github.com/yourname/ClipboardSender";
+    // Docs URL に変更
+    private const string HELP_URL = "https://stayhomelab.net/ClipboardSender";
 
     private readonly NotifyIcon _tray;
     private readonly ClipboardWatcherForm _watcher;
@@ -214,7 +215,7 @@ internal sealed class TrayAppContext : ApplicationContext
         _tray.ContextMenuStrip.Items.Add(_menuDeleteInbox);
         _tray.ContextMenuStrip.Items.Add(_menuSettings);
 
-        // ★追加：Help / About を Settings の下に
+        // Help / About を Settings の下に
         _tray.ContextMenuStrip.Items.Add(_menuHelp);
         _tray.ContextMenuStrip.Items.Add(_menuAbout);
 
@@ -260,7 +261,7 @@ internal sealed class TrayAppContext : ApplicationContext
             UpdateCleanupModeInfo();
         };
 
-        // ★追加：Help（ブラウザ起動）
+        // Help（ブラウザ起動）
         _menuHelp.Click += (_, __) =>
         {
             try
@@ -277,7 +278,7 @@ internal sealed class TrayAppContext : ApplicationContext
             }
         };
 
-        // ★追加：About（バージョン表示）
+        // About（バージョン表示）
         _menuAbout.Click += (_, __) =>
         {
             using var top = new Form { TopMost = true, ShowInTaskbar = false };
@@ -378,7 +379,6 @@ internal sealed class TrayAppContext : ApplicationContext
         _menuDeleteInbox.Text = I18n.T("MenuDeleteInbox");
         _menuSettings.Text = I18n.T("MenuSettings");
 
-        // ★追加
         _menuHelp.Text = I18n.T("MenuHelp");
         _menuAbout.Text = I18n.T("MenuAbout");
 

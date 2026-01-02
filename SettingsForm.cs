@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 internal sealed class SettingsForm : Form
 {
     // ★ここを書き換えて使ってね
-    private const string HelpUrl = "https://stayhomelab.net/";
+    private const string HelpUrl = "https://stayhomelab.net/ClipboardSender";
     private const string WebsiteUrl = "https://github.com/StayHomeLabNet/ClipboardSender"; // ★Version右のWebサイトリンク
 
     // MOD_* の値（Program.csと合わせる）
