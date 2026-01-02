@@ -47,9 +47,14 @@ Notemod-selfhosted と連携することで、次のような用途を想定し�
 ## インストール
 
 1. GitHub の Releases から最新版をダウンロード
+ - https://github.com/StayHomeLabNet/ClipboardSender/releases
 2. 展開して `.exe` を実行
 
-> 初回起動時に必要な設定（宛先URL、トークン等）を設定画面を開いて行なってください
+- 🇯🇵 [Why the exe file is large (日本語)](docs/exe_size_ja.md)
+このアプリは .NET の自己完結型（self-contained）としてビルドされています。
+.NET ランタイムを exe に同梱しているため、追加インストールは不要です。
+
+そのため、ファイルサイズ（約150MB）は想定どおりのものです。
 
 ---
 

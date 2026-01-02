@@ -50,9 +50,14 @@ Examples using iPhone Shortcuts:
 ## Installation
 
 1. Download the latest release from **GitHub Releases**
+ - https://github.com/StayHomeLabNet/ClipboardSender/releases
 2. Extract and run the `.exe`
 
-> Open the Settings screen and configure required values (destination URL, token, etc.) on first launch.
+- 🇺🇸 [Why the exe file is large (English)](docs/exe_size_en.md)
+This executable is built as a self-contained .NET application.
+The .NET runtime is bundled inside the exe, so no additional installation is required.
+
+The larger file size (~140MB) is expected and intentional.
 
 ---
 
