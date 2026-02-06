@@ -1,6 +1,6 @@
 # Clipboard Sync (Windows Tray App)
 
-> Former name: **Clipboard Sender** (renamed in v1.0.0 after adding *receive* support)
+> Former name: **Clipboard Sender** (renamed in v1.0.1 after adding *receive* support)
 
 **Clipboard Sync** is a lightweight Windows tray app for **Notemod-selfhosted** that makes clipboard sharing *bidirectional*:
 
@@ -8,6 +8,9 @@
 - **Receive**: Notemod-selfhosted → Windows clipboard → *(optional)* auto **paste (Ctrl+V)** with one hotkey
 
 It also supports scheduled **INBOX cleanup** and (if backups are enabled on the server) a one-click **backup file purge** from the Settings screen.
+
+## Highlights
+- When disabled, the specifications have been changed so that both automatic deletion of backup files and receiving data to the clipboard are stopped.
 
 ## Features
 

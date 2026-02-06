@@ -1,6 +1,6 @@
 # Clipboard Sync（Windows 常駐トレイアプリ）
 
-> 旧名：**Clipboard Sender**（v1.0.0 で *受信* 対応により **Clipboard Sync** に改名）
+> 旧名：**Clipboard Sender**（v1.0.1 で *受信* 対応により **Clipboard Sync** に改名）
 
 **Clipboard Sync** は **Notemod-selfhosted** 用の軽量な Windows トレイアプリです。  
 クリップボード共有が **双方向** になります。
@@ -9,6 +9,9 @@
 - **受信**：Notemod-selfhosted → Windows のクリップボード →（任意）**自動ペースト（Ctrl+V）**
 
 さらに、INBOX の定期削除（Cleanup）と、サーバーに溜まりがちな **バックアップファイルの一括削除** も行えます。
+
+## 主な変更点
+- 無効化時は、バックアップファイルの自動削除もクリップボードへの受信も停止するように仕様変更
 
 ## 主な機能
 
