@@ -184,7 +184,7 @@ internal static class BasicAuth
 
 internal sealed class TrayAppContext : ApplicationContext
 {
-    private const string HELP_URL = "https://stayhomelab.net/ClipboardSync";
+    private const string HELP_URL = "https://stayhomelab.net/ClipboardSender";
 
     private readonly NotifyIcon _tray;
     private readonly ClipboardWatcherForm _watcher;
@@ -268,6 +268,8 @@ internal sealed class TrayAppContext : ApplicationContext
 
         _menuDeleteInbox.Click += async (_, __) =>
         {
+            // Disabled = app paused (no send / receive / delete)
+            if (!SettingsStore.Current.Enabled) return;
             var r = MessageBox.Show(
                 I18n.T("ConfirmDeleteInboxBody"),
                 I18n.T("ConfirmTitle"),
@@ -340,7 +342,10 @@ internal sealed class TrayAppContext : ApplicationContext
 
         _watcher.EnabledToggled += (_, enabled) =>
         {
+            // Hotkey toggle also affects auto-delete
+            CleanupScheduler.ApplyFromSettings();
             SyncEnabledMenu();
+            UpdateCleanupModeInfo();
             ShowToggleBalloon(enabled);
         };
 
@@ -452,6 +457,9 @@ internal sealed class TrayAppContext : ApplicationContext
                 I18n.SetLanguage(newSettings.Language);
                 RefreshTrayTexts();
                 SyncEnabledMenu();
+
+                // Apply master Enabled + schedule settings
+                CleanupScheduler.ApplyFromSettings();
                 UpdateCleanupModeInfo();
             });
         };
@@ -489,7 +497,11 @@ internal sealed class TrayAppContext : ApplicationContext
         s.Enabled = !s.Enabled;
         SettingsStore.Save(s);
 
+        // Enabled is a master switch: it also controls auto-delete scheduling
+        CleanupScheduler.ApplyFromSettings();
+
         SyncEnabledMenu();
+        UpdateCleanupModeInfo();
         ShowToggleBalloon(s.Enabled);
     }
 
@@ -515,6 +527,10 @@ internal sealed class TrayAppContext : ApplicationContext
     private static string GetCleanupModeText()
     {
         var s = SettingsStore.Current;
+
+        // Disabled = app paused (no send / receive / delete)
+        if (!s.Enabled)
+            return I18n.T("CleanupModeOff");
 
         if (s.CleanupDailyEnabled && s.CleanupEveryEnabled)
         {
@@ -577,7 +593,7 @@ internal static class AppInfo
         var asm = Assembly.GetExecutingAssembly();
         var prod = asm.GetCustomAttributes<AssemblyProductAttribute>().FirstOrDefault()?.Product;
         if (!string.IsNullOrWhiteSpace(prod)) return prod!;
-        return asm.GetName().Name ?? "Clipboard Sync";
+        return asm.GetName().Name ?? "ClipboardSender";
     }
 
     public static string GetVersionString()
@@ -1116,10 +1132,19 @@ internal static class CleanupScheduler
 
         var s = SettingsStore.Current;
 
+        // Disabled = app paused (no send / receive / delete)
+        if (!s.Enabled) return;
+
         if (!s.CleanupDailyEnabled && !s.CleanupEveryEnabled) return;
 
-        if (s.CleanupDailyEnabled) ScheduleNextDaily();
-        else if (s.CleanupEveryEnabled) ScheduleEveryMinutes();
+        if (s.CleanupDailyEnabled)
+        {
+            ScheduleNextDaily();
+        }
+        else if (s.CleanupEveryEnabled)
+        {
+            ScheduleEveryMinutes();
+        }
     }
 
     public static void Stop()
@@ -1162,6 +1187,14 @@ internal static class CleanupScheduler
 
         try
         {
+            var s = SettingsStore.Current;
+
+            // Disabled = app paused (no send / receive / delete)
+            if (!s.Enabled) return;
+
+            // If schedule was turned off while timer was pending, skip
+            if (!s.CleanupDailyEnabled && !s.CleanupEveryEnabled) return;
+
             var (ok, info) = await CleanupApi.DeleteInboxAllAsync();
             CleanupFinished?.Invoke(null, (ok, info));
         }
@@ -1176,8 +1209,20 @@ internal static class CleanupScheduler
             if (rescheduleDaily)
             {
                 var s = SettingsStore.Current;
-                if (s.CleanupDailyEnabled && !s.CleanupEveryEnabled) ScheduleNextDaily();
-                else Stop();
+
+                // If disabled, stop (do not reschedule)
+                if (!s.Enabled)
+                {
+                    Stop();
+                }
+                else if (s.CleanupDailyEnabled && !s.CleanupEveryEnabled)
+                {
+                    ScheduleNextDaily();
+                }
+                else
+                {
+                    Stop();
+                }
             }
         }
     }
@@ -1196,7 +1241,7 @@ internal static class I18n
         {
             ["en"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                ["TrayTitle"] = "Clipboard Sync",
+                ["TrayTitle"] = "ClipboardSync",
                 ["MenuEnabled"] = "Enabled",
                 ["MenuDisabled"] = "Disabled",
                 ["MenuDeleteInbox"] = "Delete all INBOX notes",
@@ -1302,7 +1347,7 @@ internal static class I18n
 
             ["ja"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                ["TrayTitle"] = "Clipboard Sync",
+                ["TrayTitle"] = "ClipboardSync",
                 ["MenuEnabled"] = "有効",
                 ["MenuDisabled"] = "無効",
                 ["MenuDeleteInbox"] = "INBOX全削除",
@@ -1408,7 +1453,7 @@ internal static class I18n
 
             ["tr"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                ["TrayTitle"] = "Clipboard Sync",
+                ["TrayTitle"] = "ClipboardSync",
                 ["MenuEnabled"] = "Etkin",
                 ["MenuDisabled"] = "Devre dışı",
                 ["MenuDeleteInbox"] = "INBOX'taki tüm notları sil",
