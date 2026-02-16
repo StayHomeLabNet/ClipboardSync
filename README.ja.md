@@ -85,9 +85,27 @@ Notemod-selfhosted（サーバー） + Clipboard Sync（Windows） + iPhone の�
 > ※ 自動ペーストは、貼り付け先アプリが **管理者権限** で動いていると拒否されることがあります。  
 > まずはメモ帳などで動作確認してください。
 
-## 開発者向け（ビルド）
+## 開発者向け（アーキテクチャ・プロジェクト構成）
 
-- Visual Studio 2022 + .NET 8 SDK + WinForms ワークロード
+本プロジェクトは保守性と拡張性を高めるため、機能ごとにディレクトリを分割したモジュラーアーキテクチャを採用しています。
+
+- **`Api/`**: HTTP通信処理（`Sender.cs`, `Receiver.cs`, `CleanupApi.cs` 等）
+- **`Models/`**: データ構造（`AppSettings.cs`）
+- **`Native/`**: Windows API、クリップボード、ホットキー制御（`ClipboardUtil.cs`, `PasteHelper.cs` 等）
+- **`Services/`**: アプリケーションロジック、設定保存、定期実行、多言語化（`SettingsStore.cs`, `CleanupScheduler.cs`, `I18n.cs` 等）
+- **`UI/`**: 画面・トレイ制御（`TrayAppContext.cs`, `SettingsForm.cs` 等）
+
+※ 設定画面（`SettingsForm`）は `partial class` を用いて「レイアウト（見た目）」と「ロジック」を分離しています。
+
+### ビルド要件
+- Visual Studio 2022
+- .NET 8 SDK
+- WinForms ワークロード
+
+### リソースの埋め込みについて
+トレイアイコンは1つのフォルダからでも実行できるように `EmbeddedResource`（埋め込みリソース）として設定されています。
+- `Assets/tray_on.ico`
+- `Assets/tray_off.ico`
 
 ## セキュリティ / プライバシー
 

@@ -84,24 +84,25 @@ Settings are split into two tabs:
 > Note: Auto paste may fail when the target application is running as **Administrator**.  
 > Try pasting into Notepad first to verify basic operation.
 
-## Build (for developers)
+## Project Structure (For Developers)
 
-### Prerequisites
+To enhance maintainability and scalability, the codebase follows a modular architecture, separating concerns into distinct directories:
 
+- **`Api/`**: HTTP communication (`Sender.cs`, `Receiver.cs`, `CleanupApi.cs`, etc.)
+- **`Models/`**: Data structures (`AppSettings.cs`)
+- **`Native/`**: Windows API, clipboard, and hotkey management (`ClipboardUtil.cs`, `PasteHelper.cs`, etc.)
+- **`Services/`**: Application logic, state management, scheduling, and i18n (`SettingsStore.cs`, `CleanupScheduler.cs`, `I18n.cs`, etc.)
+- **`UI/`**: User interface and tray context (`TrayAppContext.cs`, `SettingsForm.cs`, etc.)
+
+*Note: The `SettingsForm` uses partial classes to strictly separate UI layout code from business logic.*
+
+### Build Prerequisites
 - Visual Studio 2022
 - .NET 8 SDK
 - Windows Forms workload
 
-### Steps
-
-1. Open the solution in Visual Studio.
-2. Build / publish.
-3. Ensure icons are included correctly (see next section).
-
-## About embedding icons/resources (Resources)
-
+### About embedding icons/resources
 Tray icons are embedded resources (so the tray icon works even when running from a single folder).
-
 - `Assets/tray_on.ico` → EmbeddedResource
 - `Assets/tray_off.ico` → EmbeddedResource
 - `Assets/app.ico` → ApplicationIcon
