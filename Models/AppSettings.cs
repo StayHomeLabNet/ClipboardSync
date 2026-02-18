@@ -7,7 +7,7 @@ internal sealed class AppSettings
     public string TokenEncrypted { get; set; } = "";
 
     public bool Enabled { get; set; } = true;
-    public bool ShowMessageOnSuccess { get; set; } = true;
+    public bool ShowMessageOnSuccess { get; set; } = false;
 
     public uint HotkeyModifiers { get; set; } = 0x0001 | 0x0002; // Alt|Ctrl
     public int HotkeyVk { get; set; } = 0x4E; // N
