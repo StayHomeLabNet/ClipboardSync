@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 internal sealed class TrayAppContext : ApplicationContext
 {
-    private const string HELP_URL = "https://stayhomelab.net/ClipboardSender";
+    private const string HELP_URL = "https://stayhomelab.net/ClipboardSync";
 
     private readonly NotifyIcon _tray;
     private readonly ClipboardWatcherForm _watcher;
@@ -31,12 +31,12 @@ internal sealed class TrayAppContext : ApplicationContext
         _iconOn = EmbeddedIcon.LoadByFileName("tray_on.ico");
         _iconOff = EmbeddedIcon.LoadByFileName("tray_off.ico");
 
+        // ★null警告対策済み：ここでは ContextMenuStrip を new しない
         _tray = new NotifyIcon
         {
             Icon = SettingsStore.Current.Enabled ? _iconOn : _iconOff,
             Text = I18n.T("TrayTitle"),
-            Visible = true,
-            ContextMenuStrip = new ContextMenuStrip()
+            Visible = true
         };
 
         BuildContextMenu();
@@ -54,19 +54,25 @@ internal sealed class TrayAppContext : ApplicationContext
         SyncEnabledMenu();
     }
 
+    // ★重複エラー対策済み：このメソッドは1つだけにしました
     private void BuildContextMenu()
     {
-        _tray.ContextMenuStrip.Items.Add(_enabledMenuItem);
-        _tray.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-        _tray.ContextMenuStrip.Items.Add(_cleanupModeInfoItem);
-        _tray.ContextMenuStrip.Items.Add(_cleanupLastResultItem);
-        _tray.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-        _tray.ContextMenuStrip.Items.Add(_menuDeleteInbox);
-        _tray.ContextMenuStrip.Items.Add(_menuSettings);
-        _tray.ContextMenuStrip.Items.Add(_menuHelp);
-        _tray.ContextMenuStrip.Items.Add(_menuAbout);
-        _tray.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-        _tray.ContextMenuStrip.Items.Add(_menuExit);
+        // ローカル変数でメニューを作ってから、最後にセットする（null警告を回避）
+        var menu = new ContextMenuStrip();
+
+        menu.Items.Add(_enabledMenuItem);
+        menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(_cleanupModeInfoItem);
+        menu.Items.Add(_cleanupLastResultItem);
+        menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(_menuDeleteInbox);
+        menu.Items.Add(_menuSettings);
+        menu.Items.Add(_menuHelp);
+        menu.Items.Add(_menuAbout);
+        menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(_menuExit);
+
+        _tray.ContextMenuStrip = menu;
     }
 
     private void SubscribeMenuEvents()
@@ -112,8 +118,6 @@ internal sealed class TrayAppContext : ApplicationContext
             UpdateCleanupModeInfo();
         });
     }
-
-    // --- イベントハンドラの実装 ---
 
     private async Task OnDeleteInboxClicked()
     {
@@ -232,8 +236,6 @@ internal sealed class TrayAppContext : ApplicationContext
             _tray.ShowBalloonTip(1000);
         });
     }
-
-    // --- 既存のヘルパーメソッド群 ---
 
     private void RunOnUi(Action a)
     {
