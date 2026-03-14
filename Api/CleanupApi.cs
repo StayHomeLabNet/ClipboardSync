@@ -13,7 +13,7 @@ internal static class CleanupApi
         try
         {
             var s = SettingsStore.Current;
-            var baseUrl = (s.CleanupBaseUrl ?? "").Trim();
+            var baseUrl = NormalizeToCleanupApiUrl((s.CleanupBaseUrl ?? "").Trim());
             if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var _)) return (false, "Cleanup_API URL is not set or invalid");
 
             var token = (DpapiHelper.Decrypt(s.CleanupTokenEncrypted) ?? "").Trim();
@@ -41,12 +41,18 @@ internal static class CleanupApi
         }
     }
 
-    public static async Task<(bool ok, int count, string info)> GetBackupCountAsync()
+    public static async Task<(bool ok, int count, string info)> GetImageCountAsync() => await GetCountInternalAsync("purge_images");
+
+    public static async Task<(bool ok, int count, string info)> GetFileCountAsync() => await GetCountInternalAsync("purge_files");
+
+    public static async Task<(bool ok, int count, string info)> GetBackupCountAsync() => await GetCountInternalAsync("purge_bak");
+
+    private static async Task<(bool ok, int count, string info)> GetCountInternalAsync(string purgeKey)
     {
         try
         {
             var s = SettingsStore.Current;
-            var baseUrl = (s.CleanupBaseUrl ?? "").Trim();
+            var baseUrl = NormalizeToCleanupApiUrl((s.CleanupBaseUrl ?? "").Trim());
             if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var _)) return (false, -1, "Cleanup_API URL is not set or invalid");
 
             var token = (DpapiHelper.Decrypt(s.CleanupTokenEncrypted) ?? "").Trim();
@@ -55,7 +61,7 @@ internal static class CleanupApi
             var url = baseUrl;
             if (s.CleanupPretty) url = AppendQuery(baseUrl, "pretty", "1");
 
-            var kv = new List<KeyValuePair<string, string>> { new("token", token), new("purge_bak", "1"), new("dry_run", "2") };
+            var kv = new List<KeyValuePair<string, string>> { new("token", token), new(purgeKey, "1"), new("dry_run", "2") };
             using var content = new FormUrlEncodedContent(kv);
             content.Headers.ContentType!.CharSet = "utf-8";
 
@@ -83,7 +89,7 @@ internal static class CleanupApi
         try
         {
             var s = SettingsStore.Current;
-            var baseUrl = (s.CleanupBaseUrl ?? "").Trim();
+            var baseUrl = NormalizeToCleanupApiUrl((s.CleanupBaseUrl ?? "").Trim());
             if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var _)) return (false, "Cleanup_API URL is not set or invalid");
 
             var token = (DpapiHelper.Decrypt(s.CleanupTokenEncrypted) ?? "").Trim();
@@ -93,6 +99,39 @@ internal static class CleanupApi
             if (s.CleanupPretty) url = AppendQuery(baseUrl, "pretty", "1");
 
             var kv = new List<KeyValuePair<string, string>> { new("token", token), new("purge_bak", "1"), new("confirm", "YES") };
+            using var content = new FormUrlEncodedContent(kv);
+            content.Headers.ContentType!.CharSet = "utf-8";
+
+            using var req = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
+            BasicAuth.Apply(req, s);
+
+            using var res = await Client.SendAsync(req);
+            var body = await res.Content.ReadAsStringAsync();
+
+            if (!res.IsSuccessStatusCode) return (false, $"HTTP {(int)res.StatusCode}\n\n{body}");
+            return (true, string.IsNullOrWhiteSpace(body) ? "OK (empty response)" : body);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    public static async Task<(bool ok, string info)> PurgeMediaAsync()
+    {
+        try
+        {
+            var s = SettingsStore.Current;
+            var baseUrl = NormalizeToCleanupApiUrl((s.CleanupBaseUrl ?? "").Trim());
+            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var _)) return (false, "Cleanup_API URL is not set or invalid");
+
+            var token = (DpapiHelper.Decrypt(s.CleanupTokenEncrypted) ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(token)) return (false, "Cleanup_API token is not set / cannot be decrypted");
+
+            var url = baseUrl;
+            if (s.CleanupPretty) url = AppendQuery(baseUrl, "pretty", "1");
+
+            var kv = new List<KeyValuePair<string, string>> { new("token", token), new("purge_media", "1"), new("confirm", "YES") };
             using var content = new FormUrlEncodedContent(kv);
             content.Headers.ContentType!.CharSet = "utf-8";
 
@@ -160,5 +199,24 @@ internal static class CleanupApi
     {
         var sep = url.Contains("?") ? "&" : "?";
         return url + sep + Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value);
+    }
+
+    private static string NormalizeToCleanupApiUrl(string url)
+    {
+        url = (url ?? "").Trim().TrimEnd('/');
+
+        if (url.EndsWith("/cleanup_api.php", StringComparison.OrdinalIgnoreCase))
+            return url;
+
+        if (url.EndsWith("/api.php", StringComparison.OrdinalIgnoreCase))
+            return url[..^"/api.php".Length] + "/cleanup_api.php";
+
+        if (url.EndsWith("/read_api.php", StringComparison.OrdinalIgnoreCase))
+            return url[..^"/read_api.php".Length] + "/cleanup_api.php";
+
+        if (url.EndsWith("/api", StringComparison.OrdinalIgnoreCase))
+            return url + "/cleanup_api.php";
+
+        return url + "/cleanup_api.php";
     }
 }

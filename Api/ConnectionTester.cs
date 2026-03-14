@@ -13,6 +13,8 @@ internal static class ConnectionTester
 
         try
         {
+            url = NormalizeToApiUrl(url);
+
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
             var kv = new List<KeyValuePair<string, string>>
             {
@@ -44,5 +46,24 @@ internal static class ConnectionTester
         {
             return (false, ex.Message);
         }
+    }
+
+    private static string NormalizeToApiUrl(string url)
+    {
+        url = (url ?? "").Trim().TrimEnd('/');
+
+        if (url.EndsWith("/api.php", StringComparison.OrdinalIgnoreCase))
+            return url;
+
+        if (url.EndsWith("/read_api.php", StringComparison.OrdinalIgnoreCase))
+            return url[..^"/read_api.php".Length] + "/api.php";
+
+        if (url.EndsWith("/cleanup_api.php", StringComparison.OrdinalIgnoreCase))
+            return url[..^"/cleanup_api.php".Length] + "/api.php";
+
+        if (url.EndsWith("/api", StringComparison.OrdinalIgnoreCase))
+            return url + "/api.php";
+
+        return url + "/api.php";
     }
 }

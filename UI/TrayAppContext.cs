@@ -1,8 +1,7 @@
-// UI/TrayAppContext.cs
 using System;
 using System.Diagnostics;
-using System.Windows.Forms;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 internal sealed class TrayAppContext : ApplicationContext
 {
@@ -31,35 +30,7 @@ internal sealed class TrayAppContext : ApplicationContext
         _iconOn = EmbeddedIcon.LoadByFileName("tray_on.ico");
         _iconOff = EmbeddedIcon.LoadByFileName("tray_off.ico");
 
-        // ★null警告対策済み：ここでは ContextMenuStrip を new しない
-        _tray = new NotifyIcon
-        {
-            Icon = SettingsStore.Current.Enabled ? _iconOn : _iconOff,
-            Text = I18n.T("TrayTitle"),
-            Visible = true
-        };
-
-        BuildContextMenu();
-        SubscribeMenuEvents();
-        SubscribeAppEvents();
-
-        _watcher.Show();
-        _watcher.Hide();
-
-        CleanupScheduler.ApplyFromSettings();
-
-        RefreshTrayTexts();
-        UpdateCleanupModeInfo();
-        UpdateCleanupLastResultInfo();
-        SyncEnabledMenu();
-    }
-
-    // ★重複エラー対策済み：このメソッドは1つだけにしました
-    private void BuildContextMenu()
-    {
-        // ローカル変数でメニューを作ってから、最後にセットする（null警告を回避）
         var menu = new ContextMenuStrip();
-
         menu.Items.Add(_enabledMenuItem);
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(_cleanupModeInfoItem);
@@ -72,7 +43,26 @@ internal sealed class TrayAppContext : ApplicationContext
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(_menuExit);
 
-        _tray.ContextMenuStrip = menu;
+        _tray = new NotifyIcon
+        {
+            Icon = SettingsStore.Current.Enabled ? _iconOn : _iconOff,
+            Text = I18n.T("TrayTitle"),
+            Visible = true,
+            ContextMenuStrip = menu
+        };
+
+        SubscribeMenuEvents();
+        SubscribeAppEvents();
+
+        _watcher.Show();
+        _watcher.Hide();
+
+        CleanupScheduler.ApplyFromSettings();
+
+        RefreshTrayTexts();
+        UpdateCleanupModeInfo();
+        UpdateCleanupLastResultInfo();
+        SyncEnabledMenu();
     }
 
     private void SubscribeMenuEvents()
@@ -104,8 +94,14 @@ internal sealed class TrayAppContext : ApplicationContext
             ShowToggleBalloon(enabled);
         };
 
-        _watcher.ClipboardTextCopied += async (_, text) => await OnClipboardTextCopied(text);
-        _watcher.ReceiveHotkeyPressed += async (_, __) => await OnReceiveHotkeyPressed();
+        _watcher.ClipboardTextCopied += async (_, text) => await OnClipboardCopied(() => Sender.SendAsync(text));
+        _watcher.ClipboardImageCopied += async (_, imgBytes) => await OnClipboardCopied(() => Sender.SendImageAsync(imgBytes));
+        _watcher.ClipboardFileCopied += async (_, filePath) => await OnClipboardCopied(() => Sender.SendFileAsync(filePath));
+
+        _watcher.ReceiveLatestHotkeyPressed += async (_, __) => await OnReceiveLatestHotkeyPressed();
+        _watcher.ReceiveHotkeyPressed += async (_, __) => await OnReceiveTextHotkeyPressed();
+        _watcher.ReceiveImageHotkeyPressed += async (_, __) => await OnReceiveImageHotkeyPressed();
+        _watcher.ReceiveFileHotkeyPressed += async (_, __) => await OnReceiveFileHotkeyPressed();
 
         CleanupScheduler.CleanupFinished += (_, result) => OnCleanupFinished(result.ok, result.info);
 
@@ -131,9 +127,7 @@ internal sealed class TrayAppContext : ApplicationContext
 
         var (ok, info) = await CleanupApi.DeleteInboxAllAsync();
 
-        using var top = new Form { TopMost = true, ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Location = new System.Drawing.Point(-2000, -2000) };
-        top.Show();
-
+        using var top = NewTopMostHelperForm();
         MessageBox.Show(top, info, ok ? I18n.T("CleanupDoneTitle") : I18n.T("CleanupFailTitle"), MessageBoxButtons.OK, ok ? MessageBoxIcon.Information : MessageBoxIcon.Error);
     }
 
@@ -156,8 +150,7 @@ internal sealed class TrayAppContext : ApplicationContext
 
     private void OnAboutClicked()
     {
-        using var top = new Form { TopMost = true, ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Location = new System.Drawing.Point(-2000, -2000) };
-        top.Show();
+        using var top = NewTopMostHelperForm();
 
         var appName = AppInfo.GetProductName();
         var ver = AppInfo.GetVersionString();
@@ -166,29 +159,60 @@ internal sealed class TrayAppContext : ApplicationContext
         MessageBox.Show(top, body, I18n.T("AboutTitle"), MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
-    private async Task OnClipboardTextCopied(string text)
+    private async Task OnClipboardCopied(Func<Task<(bool ok, string info)>> sendAction)
     {
         if (!SettingsStore.Current.Enabled) return;
 
-        var (ok, info) = await Sender.SendAsync(text);
+        var (ok, info) = await sendAction();
         var showSuccess = SettingsStore.Current.ShowMessageOnSuccess;
 
         if (!ok || showSuccess)
         {
-            using var top = new Form { TopMost = true, ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Location = new System.Drawing.Point(-2000, -2000) };
-            top.Show();
+            using var top = NewTopMostHelperForm();
             MessageBox.Show(top, info, ok ? I18n.T("SendOkTitle") : I18n.T("SendFailTitle"), MessageBoxButtons.OK, ok ? MessageBoxIcon.Information : MessageBoxIcon.Error);
         }
     }
 
-    private async Task OnReceiveHotkeyPressed()
+    private async Task OnReceiveLatestHotkeyPressed()
+    {
+        var (ok, type, info) = await Receiver.FetchLatestClipTypeAsync();
+        if (!ok)
+        {
+            using var top = NewTopMostHelperForm();
+            MessageBox.Show(top, info, I18n.T("ReceiveFailTitle"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        switch ((type ?? "").Trim().ToLowerInvariant())
+        {
+            case "note":
+            case "text":
+                await OnReceiveTextHotkeyPressed();
+                return;
+
+            case "image":
+                await OnReceiveImageHotkeyPressed();
+                return;
+
+            case "file":
+                await OnReceiveFileHotkeyPressed();
+                return;
+
+            default:
+                _tray.BalloonTipTitle = SafeT("ReceiveLatestTitle", "Receive Latest");
+                _tray.BalloonTipText = SafeT("ReceiveLatestEmpty", "Latest clipboard type was empty or unsupported");
+                _tray.ShowBalloonTip(1000);
+                return;
+        }
+    }
+
+    private async Task OnReceiveTextHotkeyPressed()
     {
         var (ok, textOrErr) = await Receiver.FetchLatestNoteTextAsync();
 
         if (!ok)
         {
-            using var top = new Form { TopMost = true, ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Location = new System.Drawing.Point(-2000, -2000) };
-            top.Show();
+            using var top = NewTopMostHelperForm();
             MessageBox.Show(top, textOrErr, I18n.T("ReceiveFailTitle"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
@@ -203,7 +227,57 @@ internal sealed class TrayAppContext : ApplicationContext
         }
 
         await ClipboardUtil.TrySetTextAsync(text);
+        await ExecuteAutoPasteAsync(I18n.T("ReceiveTitle"), I18n.T("ReceiveOkBalloon"));
+    }
 
+    private async Task OnReceiveImageHotkeyPressed()
+    {
+        var (ok, imgBytes, err) = await Receiver.FetchLatestImageAsync();
+
+        if (!ok)
+        {
+            using var top = NewTopMostHelperForm();
+            MessageBox.Show(top, err, I18n.T("ReceiveFailTitle"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        if (imgBytes == null || imgBytes.Length == 0)
+        {
+            _tray.BalloonTipTitle = I18n.T("ReceiveImageTitle");
+            _tray.BalloonTipText = I18n.T("ReceiveImageEmpty");
+            _tray.ShowBalloonTip(1000);
+            return;
+        }
+
+        await ClipboardUtil.TrySetImageAsync(imgBytes);
+        await ExecuteAutoPasteAsync(I18n.T("ReceiveImageTitle"), I18n.T("ReceiveImageOkBalloon"));
+    }
+
+    private async Task OnReceiveFileHotkeyPressed()
+    {
+        var (ok, filePath, err) = await Receiver.FetchLatestFileAsync();
+
+        if (!ok)
+        {
+            using var top = NewTopMostHelperForm();
+            MessageBox.Show(top, err, I18n.T("ReceiveFailTitle"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        if (string.IsNullOrEmpty(filePath))
+        {
+            _tray.BalloonTipTitle = I18n.T("ReceiveFileTitle");
+            _tray.BalloonTipText = I18n.T("ReceiveFileEmpty");
+            _tray.ShowBalloonTip(1000);
+            return;
+        }
+
+        await ClipboardUtil.TrySetFileDropListAsync(filePath);
+        await ExecuteAutoPasteAsync(I18n.T("ReceiveFileTitle"), I18n.T("ReceiveFileOkBalloon"));
+    }
+
+    private async Task ExecuteAutoPasteAsync(string successTitle, string successMsg)
+    {
         var waitMs = Math.Max(0, SettingsStore.Current.ClipboardStableWaitMs);
         if (waitMs > 0) await Task.Delay(waitMs);
 
@@ -212,14 +286,15 @@ internal sealed class TrayAppContext : ApplicationContext
             var okPaste = PasteHelper.CtrlV_FallbackSendKeys();
             if (!okPaste)
             {
-                _tray.BalloonTipTitle = I18n.T("ReceiveTitle");
-                _tray.BalloonTipText = "Auto paste failed.\n・貼り付け先が管理者権限のアプリだと拒否されます\n・Notepadで試してもダメなら設定/実装側の問題です";
+                _tray.BalloonTipTitle = successTitle;
+                _tray.BalloonTipText = "Auto paste failed.\n・貼り付け先が管理者権限のアプリだと拒否されます\n・Notepadでもダメなら設定/実装側の問題です";
                 _tray.ShowBalloonTip(2000);
+                return;
             }
         }
 
-        _tray.BalloonTipTitle = I18n.T("ReceiveTitle");
-        _tray.BalloonTipText = I18n.T("ReceiveOkBalloon");
+        _tray.BalloonTipTitle = successTitle;
+        _tray.BalloonTipText = successMsg;
         _tray.ShowBalloonTip(1000);
     }
 
@@ -293,15 +368,42 @@ internal sealed class TrayAppContext : ApplicationContext
 
     private void UpdateCleanupLastResultInfo()
     {
-        if (_cleanupLastAt is null || _cleanupLastOk is null) { _cleanupLastResultItem.Text = I18n.T("CleanupLastNotYet"); return; }
-        _cleanupLastResultItem.Text = string.Format(I18n.T("CleanupLastFormat"), _cleanupLastAt.Value.ToString("yyyy-MM-dd HH:mm:ss"), _cleanupLastOk.Value ? I18n.T("WordSuccess") : I18n.T("WordFail"));
+        if (_cleanupLastAt is null || _cleanupLastOk is null)
+        {
+            _cleanupLastResultItem.Text = I18n.T("CleanupLastNotYet");
+            return;
+        }
+
+        _cleanupLastResultItem.Text = string.Format(
+            I18n.T("CleanupLastFormat"),
+            _cleanupLastAt.Value.ToString("yyyy-MM-dd HH:mm:ss"),
+            _cleanupLastOk.Value ? I18n.T("WordSuccess") : I18n.T("WordFail"));
     }
 
     private static string Shorten(string s, int max)
     {
         if (string.IsNullOrWhiteSpace(s)) return "";
         s = s.Replace("\r", "").Replace("\n", " ");
-        return s.Length <= max ? s : s.Substring(0, max) + "...";
+        return s.Length <= max ? s : s[..max] + "...";
+    }
+
+    private static Form NewTopMostHelperForm()
+    {
+        var top = new Form
+        {
+            TopMost = true,
+            ShowInTaskbar = false,
+            StartPosition = FormStartPosition.Manual,
+            Location = new System.Drawing.Point(-2000, -2000)
+        };
+        top.Show();
+        return top;
+    }
+
+    private static string SafeT(string key, string fallback)
+    {
+        var v = I18n.T(key);
+        return string.Equals(v, key, StringComparison.OrdinalIgnoreCase) ? fallback : v;
     }
 
     protected override void ExitThreadCore()

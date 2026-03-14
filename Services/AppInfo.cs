@@ -9,7 +9,7 @@ internal static class AppInfo
         var asm = Assembly.GetExecutingAssembly();
         var prod = asm.GetCustomAttributes<AssemblyProductAttribute>().FirstOrDefault()?.Product;
         if (!string.IsNullOrWhiteSpace(prod)) return prod!;
-        return asm.GetName().Name ?? "ClipboardSender";
+        return asm.GetName().Name ?? "ClipboardSync";
     }
 
     public static string GetVersionString()

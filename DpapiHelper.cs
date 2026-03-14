@@ -6,7 +6,7 @@ internal static class DpapiHelper
 {
     // ユーザー単位で暗号化
     private static readonly byte[] Entropy =
-        Encoding.UTF8.GetBytes("ClipboardUrlSender");
+        Encoding.UTF8.GetBytes("ClipboardSync");
 
     public static string Encrypt(string plain)
     {

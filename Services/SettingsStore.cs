@@ -8,7 +8,7 @@ internal static class SettingsStore
 
     private static readonly string DirPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "ClipboardUrlSender");
+            "ClipboardSync");
 
     private static readonly string FilePath = Path.Combine(DirPath, "settings.json");
 
