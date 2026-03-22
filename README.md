@@ -1,16 +1,16 @@
-# Clipboard Sync
+# ClipboardSync
 
-Clipboard Sync is a Windows tray application for sending and receiving clipboard contents in coordination with Notemod-selfhosted.
+ClipboardSync is a Windows tray application for sending and receiving clipboard contents in coordination with Notemod-selfhosted.
 
-It is an extended version of Clipboard Sender, and now supports sending and receiving **text / images / files**.
+It now supports sending and receiving **text / images / files**.
 
-Combined with Notemod-selfhosted (server) + Clipboard Sync + iPhone Shortcuts / Back Tap / Action Button, etc., it is designed for a workflow like this:
+Combined with Notemod-selfhosted (server) + ClipboardSync + iPhone Shortcuts / Back Tap / Action Button, etc., it is designed for a workflow like this:
 
     Copy text on iPhone, then press a hotkey once on Windows to complete paste automatically
 
 ## Version
 
-**Clipboard Sync v1.1.0**
+**ClipboardSync v1.1.1**
 
 ## Main Features
 
@@ -43,8 +43,9 @@ Combined with Notemod-selfhosted (server) + Clipboard Sync + iPhone Shortcuts / 
 - Runs in the Windows tray
 - Supports English / Japanese / Türkçe
 - Hotkeys can be cleared with **Delete or Backspace**
-- Helper button that extracts the `/api/` directory from the `api.php` field and copies it to the Read API URL / Cleanup API URL fields
+- Helper button that extracts the `/api/` directory from the POST API field and copies it to the Read API URL / Cleanup API URL fields
 - URL directory input is also supported
+- Supports optional Notemod-selfhosted multi-user mode via a storage directory name field
 
 ## System Requirements
 
@@ -62,51 +63,52 @@ Combined with Notemod-selfhosted (server) + Clipboard Sync + iPhone Shortcuts / 
 
 ## Uninstallation
 - Delete the EXE
-- Delete the entire `Clipboard Sync` folder from `C:\Users\<username>\AppData\`
+- Delete the entire `ClipboardSync` folder from `C:\Users\<username>\AppData\`
 
 ## For Developers (Architecture / Project Structure)
-This project uses a modular architecture that separates directories by responsibility in order to improve maintainability and extensibility.  
-In Clipboard Sync v1.1.0, in addition to the traditional text send/receive functions, **image send/receive, file send/receive, Receive Latest hotkey, media deletion, and URL normalization support** have been added, and each feature is separated by responsibility.
+This project uses a modular architecture that separates directories by responsibility in order to improve maintainability and extensibility.
+
+As of ClipboardSync v1.1.1, it supports **image send/receive, file send/receive, Receive Latest hotkey, media deletion, URL normalization, and optional multi-user Notemod-selfhosted support**.
 
 - `Api/`  
   Handles HTTP communication.  
   Files such as `Sender.cs`, `Receiver.cs`, `CleanupApi.cs`, and `ConnectionTester.cs` are placed here, separating sending, receiving, cleanup, and connection testing.  
-  In v1.1.0, it supports **text / image / file sending**, **text / image / file receiving**, the **Receive Latest hotkey** using `latest_clip_type`, and **automatic API URL normalization**.
+  It supports **text / image / file sending**, **text / image / file receiving**, the **Receive Latest hotkey** using `latest_clip_type`, **automatic API URL normalization**, and optional `user=...` query support for multi-user Notemod-selfhosted environments.
 
 - `Models/`  
   Manages settings and data structures.  
-  `AppSettings.cs` stores send settings, cleanup settings, receive settings, multiple receive hotkey settings, Basic authentication information, language settings, and more.  
-  In v1.1.0, multiple receive hotkey settings, including the **Receive Latest hotkey**, have been added.
+  `AppSettings.cs` stores send settings, cleanup settings, receive settings, multiple receive hotkey settings, Basic authentication information, language settings, and the optional Notemod-selfhosted user directory name.
 
 - `Native/`  
   Handles Windows API, clipboard operations, and hotkey control.  
   It contains files such as `ClipboardWatcherForm.cs`, `ClipboardUtil.cs`, and `PasteHelper.cs`.  
-  In v1.1.0, it includes processing that supports **clipboard monitoring for text / images / files**, **multiple hotkey registrations**, **hotkey clearing with Delete / Backspace**, and **prevention of resend loops after receiving**.
+  It includes processing that supports **clipboard monitoring for text / images / files**, **multiple hotkey registrations**, **hotkey clearing with Delete / Backspace**, and **prevention of resend loops after receiving**.
 
 - `Services/`  
   Handles application logic and shared functionality.  
   It contains files such as `SettingsStore.cs`, `CleanupScheduler.cs`, `I18n.cs`, `AppInfo.cs`, and `EmbeddedIcon.cs`.  
-  It covers settings storage, scheduled cleanup, multilingual support, app information retrieval, and more. In v1.1.0, it includes **multilingual text for the latest features** and **expanded automatic cleanup**.
+  It covers settings storage, scheduled cleanup, multilingual support, app information retrieval, and more.
 
 - `UI/`  
   Handles UI control for the settings screen and tray-resident application.  
   It contains files such as `TrayAppContext.cs`, `SettingsForm.cs`, and `SettingsForm.Layout.cs`.  
-  In v1.1.0, the UI has been extended mainly around the **Send / Delete tab** and the **Receive tab**, including:
+  The UI has been extended mainly around the **Send / Delete tab** and the **Receive tab**, including:
   - Receive Latest hotkey
   - Text / Image / File receive hotkeys
   - Hotkey clear instruction label
   - “Copy directory to all API URLs” button
   - Image count / File count display
+  - Notemod-selfhosted username (storage directory name) field
 
 * The settings screen (`SettingsForm`) uses a partial class to separate **layout (appearance)** and **logic**.  
 This makes it easier to maintain by separating UI placement adjustments from behavior implementation.
 
-* As of v1.1.0, Clipboard Sync is no longer just a simple text sending tool; it is structured as a **bidirectional clipboard synchronization client** that handles **text / images / files**.
+* ClipboardSync is a **bidirectional clipboard synchronization client** that handles **text / images / files**.
 
 ## API-side Requirements
 
 ### Write
-Clipboard Sync uses `api.php` when sending.
+ClipboardSync uses `api.php` when sending.
 
 Supported content:
 - text
@@ -114,7 +116,7 @@ Supported content:
 - file
 
 ### Read
-Clipboard Sync uses `read_api.php` when receiving.
+ClipboardSync uses `read_api.php` when receiving.
 
 Actions used:
 - `action=latest_note`
@@ -123,7 +125,7 @@ Actions used:
 - `action=latest_clip_type`
 
 ### Cleanup
-Clipboard Sync uses `cleanup_api.php` for deletion and count checks.
+ClipboardSync uses `cleanup_api.php` for deletion and count checks.
 
 Main operations used:
 - `category=INBOX`
@@ -133,6 +135,28 @@ Main operations used:
 - `purge_media`
 - `dry_run=2`
 - `action=backup_now`
+
+## Multi-user Notemod-selfhosted Support
+
+A new settings field is available:
+
+- **Notemod-selfhosted username (storage directory name)**
+
+Behavior:
+- If this field is blank, ClipboardSync behaves exactly as before
+- If this field is filled in, ClipboardSync adds `user=<DIR_USER_NAME>` to all API requests
+
+Example:
+
+```text
+https://stayhomelab.net/notemod/api/read_api.php?token=5335444&user=takeshi&action=latest_clip_type
+```
+
+This applies to:
+- sending
+- receiving
+- cleanup
+- connection testing
 
 ## URL Input Specification
 
@@ -182,7 +206,8 @@ This allows a single hotkey to receive the latest clipboard item on the server, 
 ## Settings Screen
 
 ### Send / Delete Tab
-- POST URL
+- Notemod-selfhosted username (storage directory name)
+- POST API (`api.php`) URL or directory
 - Token
 - Connection Test
 - Copy directory to all API URLs
@@ -226,7 +251,7 @@ When monitoring the clipboard, content is detected in the following priority ord
 2. Image
 3. Text
 
-In other words, if a file exists in the clipboard, it is prioritized over images and text as the send target.
+If a file exists in the clipboard, it is prioritized over images and text as the send target.
 
 ## Loop Prevention
 
@@ -260,29 +285,20 @@ Settings:
 Settings are saved per Windows user.  
 Tokens, Basic authentication passwords, cleanup tokens, and similar values are encrypted using DPAPI.
 
-## Main Additions / Improvements in v1.1.0
+## Main Additions / Improvements in v1.1.1
 
-Main differences from v1.0.2:
+Main differences from v1.1.0:
 
-- Image sending
-- File sending
-- Image receiving
-- File receiving
-- Receive Latest hotkey
-- Automatic detection of receive type using `latest_clip_type`
-- Multiple receive hotkeys
-- Hotkey clearing with Delete / Backspace
-- More flexible URL input
-- Image count / File count display
-- Delete all media
-- Improved settings screen layout
-- Bulk API URL copy helper button
+- Added optional multi-user Notemod-selfhosted support
+- Added a settings field for the Notemod-selfhosted username (storage directory name)
+- Added conditional `user=...` query support to sender / receiver / cleanup / connection test requests
+- Preserved existing behavior when the new field is left blank
+- Continued cleanup and wording updates
 
 ## Troubleshooting
 
 ### Sending works, but the connection test fails
-Check URL normalization for the connection test and Basic authentication settings.  
-Make sure the implementation accepts any of `/api/`, `api.php`, `read_api.php`, or `cleanup_api.php`.
+Check URL normalization for the connection test, Basic authentication settings, and the optional Notemod-selfhosted username field.
 
 ### The filename is not as expected when receiving a file
 Check whether `file.original_name` is included in the response from `latest_clip_type`.
@@ -300,5 +316,5 @@ Please follow the license configured for this repository as needed.
 ## Links
 
 - GitHub: https://github.com/StayHomeLabNet/ClipboardSync
-- Help: https://stayhomelab.net/Clipboardsync
+- Help: https://stayhomelab.net/en/clipboardsync-en/
 - Notemod-selfhosted: https://github.com/StayHomeLabNet/Notemod-selfhosted

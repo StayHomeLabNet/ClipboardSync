@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 internal sealed class TrayAppContext : ApplicationContext
 {
-    private const string HELP_URL = "https://stayhomelab.net/ClipboardSync";
+    private const string HELP_URL = "https://stayhomelab.net/en/clipboardsync-en/";
 
     private readonly NotifyIcon _tray;
     private readonly ClipboardWatcherForm _watcher;

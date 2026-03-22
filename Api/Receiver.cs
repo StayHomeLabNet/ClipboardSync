@@ -20,8 +20,9 @@ internal static class Receiver
             var token = (DpapiHelper.Decrypt(s.TokenEncrypted) ?? "").Trim();
             if (string.IsNullOrWhiteSpace(token)) return (false, "", "Token is empty or cannot be decrypted");
 
-            var readUrl = NormalizeToReadApiUrl(baseUrl);
+            var readUrl = NormalizeReadApiUrl(baseUrl);
             var url = AppendQuery(readUrl, "token", token);
+            url = AddUserQuery(url, s.DirUserName);
             url = AppendQuery(url, "action", "latest_clip_type");
 
             using var req = new HttpRequestMessage(HttpMethod.Get, url);
@@ -69,8 +70,9 @@ internal static class Receiver
             var token = (DpapiHelper.Decrypt(s.TokenEncrypted) ?? "").Trim();
             if (string.IsNullOrWhiteSpace(token)) return (false, "Token is empty or cannot be decrypted");
 
-            var readUrl = NormalizeToReadApiUrl(baseUrl);
+            var readUrl = NormalizeReadApiUrl(baseUrl);
             var url = AppendQuery(readUrl, "token", token);
+            url = AddUserQuery(url, s.DirUserName);
             url = AppendQuery(url, "action", "latest_note");
 
             using var req = new HttpRequestMessage(HttpMethod.Get, url);
@@ -100,8 +102,9 @@ internal static class Receiver
             var token = (DpapiHelper.Decrypt(s.TokenEncrypted) ?? "").Trim();
             if (string.IsNullOrWhiteSpace(token)) return (false, null, "Token is empty or cannot be decrypted");
 
-            var readUrl = NormalizeToReadApiUrl(baseUrl);
+            var readUrl = NormalizeReadApiUrl(baseUrl);
             var url = AppendQuery(readUrl, "token", token);
+            url = AddUserQuery(url, s.DirUserName);
             url = AppendQuery(url, "action", "latest_image");
 
             using var req = new HttpRequestMessage(HttpMethod.Get, url);
@@ -138,10 +141,11 @@ internal static class Receiver
             var token = (DpapiHelper.Decrypt(s.TokenEncrypted) ?? "").Trim();
             if (string.IsNullOrWhiteSpace(token)) return (false, null, "Token is empty or cannot be decrypted");
 
-            var readUrl = NormalizeToReadApiUrl(baseUrl);
+            var readUrl = NormalizeReadApiUrl(baseUrl);
 
             string originalName = "downloaded_file.bin";
             var infoUrl = AppendQuery(readUrl, "token", token);
+            infoUrl = AddUserQuery(infoUrl, s.DirUserName);
             infoUrl = AppendQuery(infoUrl, "action", "latest_clip_type");
 
             using (var infoReq = new HttpRequestMessage(HttpMethod.Get, infoUrl))
@@ -173,6 +177,7 @@ internal static class Receiver
             }
 
             var url = AppendQuery(readUrl, "token", token);
+            url = AddUserQuery(url, s.DirUserName);
             url = AppendQuery(url, "action", "latest_file");
 
             using var req = new HttpRequestMessage(HttpMethod.Get, url);
@@ -221,23 +226,22 @@ internal static class Receiver
         }
     }
 
-    private static string NormalizeToReadApiUrl(string url)
+    private static string NormalizeReadApiUrl(string url)
     {
-        url = (url ?? "").Trim().TrimEnd('/');
-
-        if (url.EndsWith("/read_api.php", StringComparison.OrdinalIgnoreCase))
-            return url;
-
         if (url.EndsWith("/api.php", StringComparison.OrdinalIgnoreCase))
             return url[..^"/api.php".Length] + "/read_api.php";
-
         if (url.EndsWith("/cleanup_api.php", StringComparison.OrdinalIgnoreCase))
             return url[..^"/cleanup_api.php".Length] + "/read_api.php";
+        if (url.EndsWith("/api/", StringComparison.OrdinalIgnoreCase)) return url + "read_api.php";
+        if (url.EndsWith("/api", StringComparison.OrdinalIgnoreCase)) return url + "/read_api.php";
+        return url;
+    }
 
-        if (url.EndsWith("/api", StringComparison.OrdinalIgnoreCase))
-            return url + "/read_api.php";
-
-        return url + "/read_api.php";
+    private static string AddUserQuery(string url, string? dirUserName)
+    {
+        var dirUser = (dirUserName ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(dirUser)) return url;
+        return AppendQuery(url, "user", dirUser);
     }
 
     private static string AppendQuery(string url, string key, string value)

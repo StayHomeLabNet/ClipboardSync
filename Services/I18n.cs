@@ -20,10 +20,11 @@ internal static class I18n
         {
             ["en"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                ["SettingsTitle"] = "Clipboard Sync Settings",
+                ["SettingsTitle"] = "ClipboardSync Settings",
                 ["TabSendDelete"] = "Send / Delete",
                 ["TabReceive"] = "Receive",
 
+                ["DirUserLabel"] = "Notemod-selfhosted username (storage directory name)",
                 ["PostUrlLabel"] = "URL or directory of the POST API (api.php)",
                 ["ReceiveUrlLabel"] = "URL or directory of the Read API (read_api.php)",
                 ["TokenLabel"] = "Token (EXPECTED_TOKEN)",
@@ -100,7 +101,7 @@ internal static class I18n
                 ["PurgeMediaDoneTitle"] = "Media Deletion Completed",
                 ["PurgeMediaFailTitle"] = "Media Deletion Failed",
 
-                ["TrayTitle"] = "Clipboard Sync",
+                ["TrayTitle"] = "ClipboardSync",
                 ["MenuEnabled"] = "Sending: Enabled",
                 ["MenuDisabled"] = "Sending: Disabled",
                 ["MenuDeleteInbox"] = "Delete INBOX",
@@ -159,10 +160,11 @@ internal static class I18n
 
             ["ja"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                ["SettingsTitle"] = "Clipboard Sync 設定",
+                ["SettingsTitle"] = "ClipboardSync 設定",
                 ["TabSendDelete"] = "送信 / 削除",
                 ["TabReceive"] = "受信",
 
+                ["DirUserLabel"] = "Notemod-selfhosted のユーザー名（ストレージディレクトリ名）",
                 ["PostUrlLabel"] = "POST API (api.php) の URL または、ディレクトリ",
                 ["ReceiveUrlLabel"] = "Read API (read_api.php) の URL または、ディレクトリ",
                 ["TokenLabel"] = "トークン (EXPECTED_TOKEN)",
@@ -239,7 +241,7 @@ internal static class I18n
                 ["PurgeMediaDoneTitle"] = "メディア削除完了",
                 ["PurgeMediaFailTitle"] = "メディア削除失敗",
 
-                ["TrayTitle"] = "Clipboard Sync",
+                ["TrayTitle"] = "ClipboardSync",
                 ["MenuEnabled"] = "送信: 有効",
                 ["MenuDisabled"] = "送信: 無効",
                 ["MenuDeleteInbox"] = "INBOX を削除",
@@ -298,10 +300,11 @@ internal static class I18n
 
             ["tr"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                ["SettingsTitle"] = "Clipboard Sync Ayarları",
+                ["SettingsTitle"] = "ClipboardSync Ayarları",
                 ["TabSendDelete"] = "Gönder / Sil",
                 ["TabReceive"] = "Al",
 
+                ["DirUserLabel"] = "Notemod-selfhosted barındırmalı kullanıcı adı (depolama dizini adı)",
                 ["PostUrlLabel"] = "POST API'nin URL'si veya dizini (api.php)",
                 ["ReceiveUrlLabel"] = "Read API'nin URL'si veya dizini (read_api.php)",
                 ["TokenLabel"] = "Token (EXPECTED_TOKEN)",
@@ -378,7 +381,7 @@ internal static class I18n
                 ["PurgeMediaDoneTitle"] = "Medya Silme Tamamlandı",
                 ["PurgeMediaFailTitle"] = "Medya Silme Başarısız",
 
-                ["TrayTitle"] = "Clipboard Sync",
+                ["TrayTitle"] = "ClipboardSync",
                 ["MenuEnabled"] = "Gönderme: Açık",
                 ["MenuDisabled"] = "Gönderme: Kapalı",
                 ["MenuDeleteInbox"] = "INBOX'u Sil",

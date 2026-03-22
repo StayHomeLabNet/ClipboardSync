@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 
 internal static class ConnectionTester
 {
-    public static async Task<(bool ok, string message)> TestPostAsync(string url, string token, string basicUser, string basicPass)
+    public static async Task<(bool ok, string message)> TestPostAsync(string url, string token, string basicUser, string basicPass, string? dirUserName = null)
     {
         var testText = "TEST\n" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
         try
         {
             url = NormalizeToApiUrl(url);
+            url = AddUserQuery(url, dirUserName);
 
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
             var kv = new List<KeyValuePair<string, string>>
@@ -48,6 +49,13 @@ internal static class ConnectionTester
         }
     }
 
+    private static string AddUserQuery(string url, string? dirUserName)
+    {
+        var dirUser = (dirUserName ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(dirUser)) return url;
+        return AppendQuery(url, "user", dirUser);
+    }
+
     private static string NormalizeToApiUrl(string url)
     {
         url = (url ?? "").Trim().TrimEnd('/');
@@ -65,5 +73,11 @@ internal static class ConnectionTester
             return url + "/api.php";
 
         return url + "/api.php";
+    }
+
+    private static string AppendQuery(string url, string key, string value)
+    {
+        var sep = url.Contains("?") ? "&" : "?";
+        return url + sep + Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value);
     }
 }

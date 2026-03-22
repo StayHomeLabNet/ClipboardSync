@@ -36,7 +36,8 @@ internal static class Sender
             using var content = new FormUrlEncodedContent(kv);
             content.Headers.ContentType!.CharSet = "utf-8";
 
-            using var req = new HttpRequestMessage(HttpMethod.Post, baseUrl) { Content = content };
+            var url = AddUserQuery(baseUrl, s.DirUserName);
+            using var req = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
             BasicAuth.Apply(req, s);
 
             using var res = await Client.SendAsync(req);
@@ -81,7 +82,8 @@ internal static class Sender
             fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/png");
             content.Add(fileContent, "image", "clipboard.png");
 
-            using var req = new HttpRequestMessage(HttpMethod.Post, baseUrl) { Content = content };
+            var url = AddUserQuery(baseUrl, s.DirUserName);
+            using var req = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
             BasicAuth.Apply(req, s);
 
             using var res = await Client.SendAsync(req);
@@ -125,7 +127,8 @@ internal static class Sender
             var fileName = Path.GetFileName(filePath);
             content.Add(fileContent, "file", fileName);
 
-            using var req = new HttpRequestMessage(HttpMethod.Post, baseUrl) { Content = content };
+            var url = AddUserQuery(baseUrl, s.DirUserName);
+            using var req = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
             BasicAuth.Apply(req, s);
 
             using var res = await Client.SendAsync(req);
@@ -146,6 +149,13 @@ internal static class Sender
         }
     }
 
+    private static string AddUserQuery(string url, string? dirUserName)
+    {
+        var dirUser = (dirUserName ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(dirUser)) return url;
+        return AppendQuery(url, "user", dirUser);
+    }
+
     private static string NormalizeToApiUrl(string url)
     {
         url = (url ?? "").Trim().TrimEnd('/');
@@ -163,5 +173,11 @@ internal static class Sender
             return url + "/api.php";
 
         return url + "/api.php";
+    }
+
+    private static string AppendQuery(string url, string key, string value)
+    {
+        var sep = url.Contains("?") ? "&" : "?";
+        return url + sep + Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value);
     }
 }

@@ -21,6 +21,7 @@ internal static class CleanupApi
 
             var url = baseUrl;
             if (s.CleanupPretty) url = AppendQuery(baseUrl, "pretty", "1");
+            url = AddUserQuery(url, s.DirUserName);
 
             var kv = new List<KeyValuePair<string, string>> { new("token", token), new("confirm", "YES"), new("category", "INBOX") };
             using var content = new FormUrlEncodedContent(kv);
@@ -42,9 +43,7 @@ internal static class CleanupApi
     }
 
     public static async Task<(bool ok, int count, string info)> GetImageCountAsync() => await GetCountInternalAsync("purge_images");
-
     public static async Task<(bool ok, int count, string info)> GetFileCountAsync() => await GetCountInternalAsync("purge_files");
-
     public static async Task<(bool ok, int count, string info)> GetBackupCountAsync() => await GetCountInternalAsync("purge_bak");
 
     private static async Task<(bool ok, int count, string info)> GetCountInternalAsync(string purgeKey)
@@ -60,6 +59,7 @@ internal static class CleanupApi
 
             var url = baseUrl;
             if (s.CleanupPretty) url = AppendQuery(baseUrl, "pretty", "1");
+            url = AddUserQuery(url, s.DirUserName);
 
             var kv = new List<KeyValuePair<string, string>> { new("token", token), new(purgeKey, "1"), new("dry_run", "2") };
             using var content = new FormUrlEncodedContent(kv);
@@ -97,6 +97,7 @@ internal static class CleanupApi
 
             var url = baseUrl;
             if (s.CleanupPretty) url = AppendQuery(baseUrl, "pretty", "1");
+            url = AddUserQuery(url, s.DirUserName);
 
             var kv = new List<KeyValuePair<string, string>> { new("token", token), new("purge_bak", "1"), new("confirm", "YES") };
             using var content = new FormUrlEncodedContent(kv);
@@ -130,6 +131,7 @@ internal static class CleanupApi
 
             var url = baseUrl;
             if (s.CleanupPretty) url = AppendQuery(baseUrl, "pretty", "1");
+            url = AddUserQuery(url, s.DirUserName);
 
             var kv = new List<KeyValuePair<string, string>> { new("token", token), new("purge_media", "1"), new("confirm", "YES") };
             using var content = new FormUrlEncodedContent(kv);
@@ -195,10 +197,11 @@ internal static class CleanupApi
         return false;
     }
 
-    private static string AppendQuery(string url, string key, string value)
+    private static string AddUserQuery(string url, string? dirUserName)
     {
-        var sep = url.Contains("?") ? "&" : "?";
-        return url + sep + Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value);
+        var dirUser = (dirUserName ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(dirUser)) return url;
+        return AppendQuery(url, "user", dirUser);
     }
 
     private static string NormalizeToCleanupApiUrl(string url)
@@ -218,5 +221,11 @@ internal static class CleanupApi
             return url + "/cleanup_api.php";
 
         return url + "/cleanup_api.php";
+    }
+
+    private static string AppendQuery(string url, string key, string value)
+    {
+        var sep = url.Contains("?") ? "&" : "?";
+        return url + sep + Uri.EscapeDataString(key) + "=" + Uri.EscapeDataString(value);
     }
 }

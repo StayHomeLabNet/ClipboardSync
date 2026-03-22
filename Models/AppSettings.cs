@@ -3,6 +3,7 @@ using System;
 internal sealed class AppSettings
 {
     // ======= ‘—M =======
+    public string DirUserName { get; set; } = "";
     public string BaseUrl { get; set; } = "";
     public string TokenEncrypted { get; set; } = "";
     public bool Enabled { get; set; } = true;

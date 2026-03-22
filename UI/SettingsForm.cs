@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 internal sealed partial class SettingsForm : Form
 {
-    private const string HelpUrl = "https://stayhomelab.net/ClipboardSync";
+    private const string HelpUrl = "https://stayhomelab.net/en/clipboardsync-en/";
     private const string WebsiteUrl = "https://github.com/StayHomeLabNet/ClipboardSync";
 
     private const uint MOD_ALT = 0x0001;
@@ -92,8 +92,8 @@ internal sealed partial class SettingsForm : Form
             ApplyCleanupUiEnabledState();
         };
 
-        _btnCopyApiDir.Click += (_, __) => CopyApiDirectoryToOtherUrls();
         _btnTest.Click += async (_, __) => await TestConnectionAsync();
+        _btnCopyApiDir.Click += (_, __) => CopyApiDirectoryToOtherUrls();
         _btnPurgeBak.Click += async (_, __) => await PurgeBackupsAsync();
         _btnPurgeMedia.Click += async (_, __) => await PurgeMediaAsync();
 
@@ -164,6 +164,7 @@ internal sealed partial class SettingsForm : Form
         var code = string.IsNullOrWhiteSpace(s.Language) ? "en" : s.Language;
         SelectLanguage(code);
 
+        _txtDirUser.Text = s.DirUserName ?? "";
         _url.Text = s.BaseUrl ?? "";
         var tokenPlain = DpapiHelper.Decrypt(s.TokenEncrypted) ?? "";
         _tokenSend.Text = tokenPlain;
@@ -342,6 +343,7 @@ internal sealed partial class SettingsForm : Form
         var token = (_tokenSend.Text ?? "").Trim();
         var basicUser = (_basicUser.Text ?? "").Trim();
         var basicPass = (_basicPass.Text ?? "");
+        var dirUser = (_txtDirUser.Text ?? "").Trim();
 
         if (string.IsNullOrWhiteSpace(url) || (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp)))
         {
@@ -361,7 +363,7 @@ internal sealed partial class SettingsForm : Form
             return;
         }
 
-        var (ok, message) = await ConnectionTester.TestPostAsync(url, token, basicUser, basicPass);
+        var (ok, message) = await ConnectionTester.TestPostAsync(url, token, basicUser, basicPass, dirUser);
         MessageBox.Show(this, message, I18n.T("TestConnection"), MessageBoxButtons.OK, ok ? MessageBoxIcon.Information : MessageBoxIcon.Error);
     }
 
@@ -455,67 +457,6 @@ internal sealed partial class SettingsForm : Form
         }
     }
 
-    private void CopyApiDirectoryToOtherUrls()
-    {
-        var src = (_url.Text ?? "").Trim();
-
-        if (string.IsNullOrWhiteSpace(src))
-        {
-            MessageBox.Show(this, I18n.T("UrlInvalid"), I18n.T("InputErrorTitle"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
-        }
-
-        var apiDir = ExtractApiDirectory(src);
-        if (string.IsNullOrWhiteSpace(apiDir))
-        {
-            MessageBox.Show(this,
-                SafeT("CopyApiDirectoryFailed", "Could not detect the /api/ directory from the POST URL."),
-                I18n.T("InputErrorTitle"),
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-            return;
-        }
-
-        _receiveUrl.Text = apiDir;
-        _cleanupUrl.Text = apiDir;
-
-        MessageBox.Show(this,
-            SafeT("CopyApiDirectoryDone", "Copied the API directory to Read API URL and Cleanup API URL."),
-            I18n.T("SavedTitle"),
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
-    }
-
-    private static string ExtractApiDirectory(string url)
-    {
-        if (string.IsNullOrWhiteSpace(url))
-            return "";
-
-        url = url.Trim();
-
-        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
-            return "";
-
-        var abs = uri.GetLeftPart(UriPartial.Path);
-
-        if (abs.EndsWith("/api.php", StringComparison.OrdinalIgnoreCase))
-            return abs[..^"api.php".Length];
-
-        if (abs.EndsWith("/read_api.php", StringComparison.OrdinalIgnoreCase))
-            return abs[..^"read_api.php".Length];
-
-        if (abs.EndsWith("/cleanup_api.php", StringComparison.OrdinalIgnoreCase))
-            return abs[..^"cleanup_api.php".Length];
-
-        if (abs.EndsWith("/api/", StringComparison.OrdinalIgnoreCase))
-            return abs;
-
-        if (abs.EndsWith("/api", StringComparison.OrdinalIgnoreCase))
-            return abs + "/";
-
-        return abs.EndsWith("/") ? abs : abs + "/";
-    }
-
     private void SaveAndClose()
     {
         var urlSend = (_url.Text ?? "").Trim();
@@ -525,6 +466,7 @@ internal sealed partial class SettingsForm : Form
         var cleanupToken = (_cleanupToken.Text ?? "").Trim();
         var basicUser = (_basicUser.Text ?? "").Trim();
         var basicPass = (_basicPass.Text ?? "");
+        var dirUser = (_txtDirUser.Text ?? "").Trim();
 
         bool IsInvalidUrl(string u) => !string.IsNullOrWhiteSpace(u) &&
             (!Uri.TryCreate(u, UriKind.Absolute, out var uri) ||
@@ -558,6 +500,7 @@ internal sealed partial class SettingsForm : Form
 
         SettingsStore.Save(new AppSettings
         {
+            DirUserName = dirUser,
             BaseUrl = urlSend,
             TokenEncrypted = DpapiHelper.Encrypt(token),
             Enabled = _enabled.Checked,
@@ -616,6 +559,67 @@ internal sealed partial class SettingsForm : Form
         return top;
     }
 
+
+    private void CopyApiDirectoryToOtherUrls()
+    {
+        var src = (_url.Text ?? "").Trim();
+
+        if (string.IsNullOrWhiteSpace(src))
+        {
+            MessageBox.Show(this, I18n.T("UrlInvalid"), I18n.T("InputErrorTitle"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var apiDir = ExtractApiDirectory(src);
+        if (string.IsNullOrWhiteSpace(apiDir))
+        {
+            MessageBox.Show(this,
+                SafeT("CopyApiDirectoryFailed", "POST URL から /api/ ディレクトリを判定できませんでした。"),
+                I18n.T("InputErrorTitle"),
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            return;
+        }
+
+        _receiveUrl.Text = apiDir;
+        _cleanupUrl.Text = apiDir;
+
+        MessageBox.Show(this,
+            SafeT("CopyApiDirectoryDone", "api.php の欄のディレクトリを Read API URL と Cleanup API URL にコピーしました。"),
+            I18n.T("SavedTitle"),
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+    }
+
+    private static string ExtractApiDirectory(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return "";
+
+        url = url.Trim();
+
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return "";
+
+        var abs = uri.GetLeftPart(UriPartial.Path);
+
+        if (abs.EndsWith("/api.php", StringComparison.OrdinalIgnoreCase))
+            return abs[..^"api.php".Length];
+
+        if (abs.EndsWith("/read_api.php", StringComparison.OrdinalIgnoreCase))
+            return abs[..^"read_api.php".Length];
+
+        if (abs.EndsWith("/cleanup_api.php", StringComparison.OrdinalIgnoreCase))
+            return abs[..^"cleanup_api.php".Length];
+
+        if (abs.EndsWith("/api/", StringComparison.OrdinalIgnoreCase))
+            return abs;
+
+        if (abs.EndsWith("/api", StringComparison.OrdinalIgnoreCase))
+            return abs + "/";
+
+        return abs.EndsWith("/") ? abs : abs + "/";
+    }
     private sealed class LangItem
     {
         public string Code { get; }

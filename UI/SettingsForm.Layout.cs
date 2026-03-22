@@ -16,13 +16,15 @@ internal sealed partial class SettingsForm : Form
     private readonly CheckBox _chkShowTokenRecv = new() { AutoSize = true, Checked = false };
 
     // ======= 送信タブ =======
+    private readonly Label _lblDirUser = new() { AutoSize = true, Left = 12, Top = 16 };
+    private readonly TextBox _txtDirUser = new() { Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
     private readonly Label _lblUrl = new() { AutoSize = true, Left = 12, Top = 16 };
     private readonly TextBox _url = new() { Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
     private readonly Label _lblTokenSend = new() { AutoSize = true, Left = 12 };
     private readonly CheckBox _enabled = new() { AutoSize = true };
     private readonly CheckBox _showSuccess = new() { AutoSize = true };
-    private readonly Button _btnCopyApiDir = new() { Width = 240, Height = 30 };
     private readonly Button _btnTest = new() { Width = 120, Height = 30 };
+    private readonly Button _btnCopyApiDir = new() { Width = 240, Height = 30 };
     private readonly Label _lblHotkeySend = new() { AutoSize = true, Left = 12 };
     private readonly TextBox _hotkeySendBox = new() { ReadOnly = true, TabStop = true };
 
@@ -105,7 +107,7 @@ internal sealed partial class SettingsForm : Form
     private void InitializeUI()
     {
         Width = 760;
-        Height = 960;
+        Height = 980;
         MinimumSize = new System.Drawing.Size(720, 880);
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.Sizable;
@@ -118,9 +120,11 @@ internal sealed partial class SettingsForm : Form
         _tabSend.Padding = new Padding(8);
         _tabReceive.Padding = new Padding(8);
 
-        _url.Left = 12; _url.Top = 38; _url.Width = 700;
-        _lblTokenSend.Left = 12; _lblTokenSend.Top = 78;
-        _tokenSend.Left = 12; _tokenSend.Top = 98; _tokenSend.Width = 700;
+        _txtDirUser.Left = 12; _txtDirUser.Top = 38; _txtDirUser.Width = 700;
+        _lblUrl.Left = 12; _lblUrl.Top = 78;
+        _url.Left = 12; _url.Top = 98; _url.Width = 700;
+        _lblTokenSend.Left = 12; _lblTokenSend.Top = 138;
+        _tokenSend.Left = 12; _tokenSend.Top = 158; _tokenSend.Width = 700;
         _chkShowTokenSend.Left = 12; _chkShowTokenSend.Top = _tokenSend.Bottom + 6;
         _btnTest.Left = 592; _btnTest.Top = _tokenSend.Bottom + 2;
         _btnCopyApiDir.Left = _btnTest.Left - 12 - _btnCopyApiDir.Width; _btnCopyApiDir.Top = _btnTest.Top;
@@ -136,7 +140,7 @@ internal sealed partial class SettingsForm : Form
         _basicPass.Left = 380; _basicPass.Top = _lblBasicPass.Bottom + 6; _basicPass.Width = 332;
         _chkShowBasicPass.Left = 380; _chkShowBasicPass.Top = _basicPass.Bottom + 6;
 
-        _lblCleanup.Left = 12; _lblCleanup.Top = _hotkeySendBox.Bottom + 18;
+        _lblCleanup.Left = 12; _lblCleanup.Top = _hotkeySendBox.Bottom + 26;
         _lblCleanupUrl.Left = 12; _lblCleanupUrl.Top = _lblCleanup.Bottom + 8;
         _cleanupUrl.Left = 12; _cleanupUrl.Top = _lblCleanupUrl.Bottom + 6; _cleanupUrl.Width = 700;
         _lblCleanupToken.Left = 12; _lblCleanupToken.Top = _cleanupUrl.Bottom + 10;
@@ -191,6 +195,7 @@ internal sealed partial class SettingsForm : Form
 
         _tabSend.Controls.AddRange(new Control[]
         {
+            _lblDirUser, _txtDirUser,
             _lblUrl, _url, _lblTokenSend, _tokenSend, _chkShowTokenSend, _btnCopyApiDir, _btnTest, _showSuccess, _enabled,
             _lblHotkeySend, _hotkeySendBox, _lblBasic, _lblBasicUser, _basicUser, _lblBasicPass, _basicPass,
             _chkShowBasicPass, _lblCleanup, _lblCleanupUrl, _cleanupUrl, _lblCleanupToken, _cleanupToken,
@@ -215,6 +220,7 @@ internal sealed partial class SettingsForm : Form
 
     private void ApplyResponsiveLayout()
     {
+        FitWidthToTab(_tabSend, _txtDirUser, 12, 12);
         FitWidthToTab(_tabSend, _url, 12, 12);
         FitWidthToTab(_tabSend, _tokenSend, 12, 12);
         FitWidthToTab(_tabSend, _cleanupUrl, 12, 12);
@@ -311,11 +317,12 @@ internal sealed partial class SettingsForm : Form
         _tabSend.Text = I18n.T("TabSendDelete");
         _tabReceive.Text = I18n.T("TabReceive");
 
+        _lblDirUser.Text = I18n.T("DirUserLabel");
         _lblUrl.Text = I18n.T("PostUrlLabel");
         _lblTokenSend.Text = I18n.T("TokenLabel");
         _chkShowTokenSend.Text = I18n.T("ShowToken");
-        _btnCopyApiDir.Text = SafeT("CopyApiDirectoryButton", "ディレクトリをすべてのAPI URLにコピー");
         _btnTest.Text = I18n.T("TestConnection");
+        _btnCopyApiDir.Text = SafeT("CopyApiDirectoryButton", "ディレクトリをすべてのAPI URLにコピー");
         _enabled.Text = I18n.T("EnabledCheckbox");
         _showSuccess.Text = I18n.T("ShowSuccessCheckbox");
         _lblHotkeySend.Text = I18n.T("HotkeyLabel");
@@ -343,8 +350,8 @@ internal sealed partial class SettingsForm : Form
         _lblTokenRecv.Text = I18n.T("TokenLabel");
         _chkShowTokenRecv.Text = I18n.T("ShowToken");
 
-        _lblHotkeyHelp.Text = I18n.T("HotkeyClearHint");
-        _lblHotkeyRecvLatest.Text = I18n.T("ReceiveLatestHotkeyLabel");
+        _lblHotkeyHelp.Text = SafeT("HotkeyClearHint", "ホットキーは、DeleteまたはBackspaceキーで解除できます。");
+        _lblHotkeyRecvLatest.Text = SafeT("ReceiveLatestHotkeyLabel", "最新を受信ホットキー");
         _lblHotkeyRecv.Text = I18n.T("ReceiveHotkeyLabel");
         _lblHotkeyRecvImage.Text = I18n.T("ReceiveImageHotkeyLabel");
         _lblHotkeyRecvFile.Text = I18n.T("ReceiveFileHotkeyLabel");
