@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -75,8 +76,8 @@ internal static class Sender
             if (imageBytes == null || imageBytes.Length == 0) return (false, "empty image");
 
             using var content = new MultipartFormDataContent();
-            content.Add(new StringContent(token), "token");
-            content.Add(new StringContent("image"), "type");
+            content.Add(new StringContent(token, Encoding.UTF8), "token");
+            content.Add(new StringContent("image", Encoding.UTF8), "type");
 
             var fileContent = new ByteArrayContent(imageBytes);
             fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/png");
@@ -119,12 +120,21 @@ internal static class Sender
 
             if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) return (false, "file not found");
 
-            using var content = new MultipartFormDataContent();
-            content.Add(new StringContent(token), "token");
-            content.Add(new StringContent("file"), "type");
-
-            var fileContent = new StreamContent(File.OpenRead(filePath));
             var fileName = Path.GetFileName(filePath);
+
+            using var content = new MultipartFormDataContent();
+            content.Add(new StringContent(token, Encoding.UTF8), "token");
+            content.Add(new StringContent("file", Encoding.UTF8), "type");
+
+            // 文字化け対策:
+            // filename= だけに頼らず、UTF-8 の original_name を別フォーム項目として明示送信する
+            // api.php 側では $_POST['original_name'] を優先して file_index.json に保存すること
+            content.Add(new StringContent(fileName, Encoding.UTF8), "original_name");
+
+            // Excel や他アプリがファイルを掴んでいる場合でも、可能な限り読み取れるよう共有モードを広げる
+            var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            var fileContent = new StreamContent(fs);
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(GetMimeTypeFromFileName(fileName));
             content.Add(fileContent, "file", fileName);
 
             var url = AddUserQuery(baseUrl, s.DirUserName);
@@ -173,6 +183,32 @@ internal static class Sender
             return url + "/api.php";
 
         return url + "/api.php";
+    }
+
+    private static string GetMimeTypeFromFileName(string fileName)
+    {
+        var ext = (Path.GetExtension(fileName) ?? "").Trim().ToLowerInvariant();
+
+        return ext switch
+        {
+            ".pdf" => "application/pdf",
+            ".txt" => "text/plain",
+            ".csv" => "text/csv",
+            ".json" => "application/json",
+            ".zip" => "application/zip",
+            ".doc" => "application/msword",
+            ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".xls" => "application/vnd.ms-excel",
+            ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ".ppt" => "application/vnd.ms-powerpoint",
+            ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            ".png" => "image/png",
+            ".jpg" => "image/jpeg",
+            ".jpeg" => "image/jpeg",
+            ".webp" => "image/webp",
+            ".gif" => "image/gif",
+            _ => "application/octet-stream",
+        };
     }
 
     private static string AppendQuery(string url, string key, string value)
