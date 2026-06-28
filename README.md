@@ -4,7 +4,7 @@
 # ClipboardSync
 
 <p>
-  A lightweight Windows tray app for bidirectional clipboard sharing with Notemod-selfhosted.
+  A Windows tray app for syncing text, images, and files between the local clipboard and Notemod-selfhosted.
 </p>
 
 <p>
@@ -15,7 +15,7 @@
     <img src="https://img.shields.io/github/license/StayHomeLabNet/ClipboardSync" alt="License">
   </a>
   <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Platform">
-  <img src="https://img.shields.io/badge/built%20with-C%23-blue" alt="Built with C#">
+  <img src="https://img.shields.io/badge/built%20with-C%23%20%2F%20.NET%208-blue" alt="Built with C# / .NET 8">
 </p>
 
 <p>
@@ -24,7 +24,15 @@
   <a href="https://github.com/StayHomeLabNet/ClipboardSync/releases">Releases</a>
   ·
   <a href="https://github.com/StayHomeLabNet/ClipboardSync/issues">Issues</a>
+  ·
+  <a href="https://ko-fi.com/stayhomelabnet">Ko-fi</a>
+  ·
+  <a href="https://buymeacoffee.com/stayhomelabnet">Buy Me a Coffee</a>
 </p>
+
+<br>
+
+<img src="./ClipboardSync.png" alt="ClipboardSync" width="220">
 
 </div>
 <!-- README HEADER END -->
