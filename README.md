@@ -1,4 +1,35 @@
+<!-- README HEADER START -->
+<div align="center">
+
 # ClipboardSync
+
+<p>
+  A lightweight Windows tray app for bidirectional clipboard sharing with Notemod-selfhosted.
+</p>
+
+<p>
+  <a href="https://github.com/StayHomeLabNet/ClipboardSync/releases">
+    <img src="https://img.shields.io/github/v/release/StayHomeLabNet/ClipboardSync?label=release" alt="Release">
+  </a>
+  <a href="https://github.com/StayHomeLabNet/ClipboardSync/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/StayHomeLabNet/ClipboardSync" alt="License">
+  </a>
+  <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Platform">
+  <img src="https://img.shields.io/badge/built%20with-C%23-blue" alt="Built with C#">
+</p>
+
+<p>
+  <a href="./README_ja.md">日本語</a>
+  ·
+  <a href="https://github.com/StayHomeLabNet/ClipboardSync/releases">Releases</a>
+  ·
+  <a href="https://github.com/StayHomeLabNet/ClipboardSync/issues">Issues</a>
+</p>
+
+</div>
+<!-- README HEADER END -->
+
+## Overview
 
 ClipboardSync is a Windows tray application for sending and receiving clipboard contents in coordination with Notemod-selfhosted.
 
@@ -11,6 +42,8 @@ Combined with Notemod-selfhosted (server) + ClipboardSync + iPhone Shortcuts / B
 ## Version
 
 **ClipboardSync v1.1.1**
+
+<img src="./ClipboardSync.png" alt="ClipboardSync">
 
 ## Main Features
 
