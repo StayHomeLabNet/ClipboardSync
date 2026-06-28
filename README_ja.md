@@ -1,8 +1,6 @@
  <!-- README HEADER START -->
 <div align="center">
 
-<img src="./ClipboardSync.png" alt="ClipboardSync" width="96">
-
 # ClipboardSync
 
 <p>
@@ -46,6 +44,8 @@ Notemod-selfhosted（サーバー） + ClipboardSync + iPhone のショートカ
 ## バージョン
 
 **ClipboardSync v1.1.1**
+
+<img src="./ClipboardSync.png" alt="ClipboardSync" width="96">
 
 ## 主な機能
 
