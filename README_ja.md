@@ -1,4 +1,37 @@
+ <!-- README HEADER START -->
+<div align="center">
+
+<img src="./ClipboardSync.png" alt="ClipboardSync" width="96">
+
 # ClipboardSync
+
+<p>
+  Notemod-selfhosted と連携して、Windows のクリップボードを送受信できる軽量トレイ常駐アプリです。
+</p>
+
+<p>
+  <a href="https://github.com/StayHomeLabNet/ClipboardSync/releases">
+    <img src="https://img.shields.io/github/v/release/StayHomeLabNet/ClipboardSync?label=release" alt="Release">
+  </a>
+  <a href="https://github.com/StayHomeLabNet/ClipboardSync/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/StayHomeLabNet/ClipboardSync" alt="License">
+  </a>
+  <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Platform">
+  <img src="https://img.shields.io/badge/built%20with-C%23-blue" alt="Built with C#">
+</p>
+
+<p>
+  <a href="./README.md">English</a>
+  ·
+  <a href="https://github.com/StayHomeLabNet/ClipboardSync/releases">Releases</a>
+  ·
+  <a href="https://github.com/StayHomeLabNet/ClipboardSync/issues">Issues</a>
+</p>
+
+</div>
+<!-- README HEADER END -->
+
+## 概要
 
 ClipboardSync は、Windows のクリップボード内容を Notemod-selfhosted と連携して送受信するための、Windows トレイ常駐アプリです。
 
