@@ -1,44 +1,30 @@
-<!-- README HEADER START -->
-<div align="center">
+# 📋 ClipboardSync
 
-# ClipboardSync
+## A Windows tray clipboard sync client for text, images, and files
 
-<p>
-  A Windows tray app for syncing text, images, and files between the local clipboard and Notemod-selfhosted.
-</p>
+**ClipboardSync sends and receives clipboard contents such as text, images, and files,  
+working together with Notemod-selfhosted to make cross-device clipboard workflows smoother.**
 
-<p>
-  <a href="https://github.com/StayHomeLabNet/ClipboardSync/releases">
-    <img src="https://img.shields.io/github/v/release/StayHomeLabNet/ClipboardSync?label=release" alt="Release">
-  </a>
-  <a href="https://github.com/StayHomeLabNet/ClipboardSync/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/StayHomeLabNet/ClipboardSync" alt="License">
-  </a>
-  <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Platform">
-  <img src="https://img.shields.io/badge/built%20with-C%23%20%2F%20.NET%208-blue" alt="Built with C# / .NET 8">
-</p>
+[English](README.md)
 
-<p>
-  <a href="./README_ja.md">日本語</a>
-  ·
-  <a href="https://github.com/StayHomeLabNet/ClipboardSync/releases">Releases</a>
-  ·
-  <a href="https://github.com/StayHomeLabNet/ClipboardSync/issues">Issues</a>
-  ·
-  <a href="https://ko-fi.com/stayhomelabnet">Ko-fi</a>
-  ·
-  <a href="https://buymeacoffee.com/stayhomelabnet">Buy Me a Coffee</a>
-</p>
+[Overview](#overview) ・ [Version](#version) ・ [Main Features](#main-features) ・ [System Requirements](#system-requirements) ・ [Installation](#installation) ・ [API-side Requirements](#api-side-requirements) ・ [Settings Screen](#settings-screen) ・ [Troubleshooting](#troubleshooting) ・ [License](#license) ・ [Links](#links)
 
-<br>
+![version](https://img.shields.io/badge/version-1.1.1-blue)
+![license](https://img.shields.io/badge/license-repository-lightgrey)
+![platform](https://img.shields.io/badge/platform-Windows-orange)
+![app](https://img.shields.io/badge/app-WinForms-purple)
+![framework](https://img.shields.io/badge/.NET-8-512BD4)
+![clipboard](https://img.shields.io/badge/text%20%2F%20images%20%2F%20files-supported-brightgreen)
+![server](https://img.shields.io/badge/server-Notemod--selfhosted-lightgrey)
 
-<img src="./ClipboardSync.png" alt="ClipboardSync" width="220">
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20StayHomeLabNet-ff5e5b?style=for-the-badge&logo=kofi&logoColor=white)](https://ko-fi.com/stayhomelabnet)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20StayHomeLabNet-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/stayhomelabnet)
 
-</div>
-<!-- README HEADER END -->
+**If ClipboardSync is useful to you, please consider supporting the project.**
+
+---
 
 ## Overview
-
 ClipboardSync is a Windows tray application for sending and receiving clipboard contents in coordination with Notemod-selfhosted.
 
 It now supports sending and receiving **text / images / files**.
