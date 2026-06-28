@@ -1,33 +1,28 @@
- <!-- README HEADER START -->
-<div align="center">
+# 📋 ClipboardSync
 
-# ClipboardSync
+## テキスト・画像・ファイルに対応した Windows トレイ常駐クリップボード同期クライアント
 
-<p>
-  Notemod-selfhosted と連携して、Windows のクリップボードを送受信できる軽量トレイ常駐アプリです。
-</p>
+**ClipboardSync は、テキスト・画像・ファイルなどのクリップボード内容を送受信し、  
+Notemod-selfhosted と連携して、端末間のクリップボード連携をスムーズにします。**
 
-<p>
-  <a href="https://github.com/StayHomeLabNet/ClipboardSync/releases">
-    <img src="https://img.shields.io/github/v/release/StayHomeLabNet/ClipboardSync?label=release" alt="Release">
-  </a>
-  <a href="https://github.com/StayHomeLabNet/ClipboardSync/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/StayHomeLabNet/ClipboardSync" alt="License">
-  </a>
-  <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Platform">
-  <img src="https://img.shields.io/badge/built%20with-C%23-blue" alt="Built with C#">
-</p>
+[English](README.md) | [日本語](README.ja.md)
 
-<p>
-  <a href="./README.md">English</a>
-  ·
-  <a href="https://github.com/StayHomeLabNet/ClipboardSync/releases">Releases</a>
-  ·
-  <a href="https://github.com/StayHomeLabNet/ClipboardSync/issues">Issues</a>
-</p>
+[概要](#概要) ・ [バージョン](#バージョン) ・ [主な機能](#主な機能) ・ [動作環境](#動作環境) ・ [インストール](#インストール) ・ [API 側の前提](#api-側の前提) ・ [設定画面](#設定画面) ・ [トラブルシュート](#トラブルシュート) ・ [ライセンス](#ライセンス) ・ [リンク](#リンク)
 
-</div>
-<!-- README HEADER END -->
+![version](https://img.shields.io/badge/version-1.1.1-blue)
+![license](https://img.shields.io/badge/license-repository-lightgrey)
+![platform](https://img.shields.io/badge/platform-Windows-orange)
+![app](https://img.shields.io/badge/app-WinForms-purple)
+![framework](https://img.shields.io/badge/.NET-8-512BD4)
+![clipboard](https://img.shields.io/badge/text%20%2F%20images%20%2F%20files-supported-brightgreen)
+![server](https://img.shields.io/badge/server-Notemod--selfhosted-lightgrey)
+
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20StayHomeLabNet-ff5e5b?style=for-the-badge&logo=kofi&logoColor=white)](https://ko-fi.com/stayhomelabnet)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20StayHomeLabNet-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/stayhomelabnet)
+
+**ClipboardSync が役に立った場合は、プロジェクト支援をご検討ください。**
+
+---
 
 ## 概要
 
