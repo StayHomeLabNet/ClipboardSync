@@ -45,7 +45,7 @@ Notemod-selfhosted（サーバー） + ClipboardSync + iPhone のショートカ
 
 **ClipboardSync v1.1.1**
 
-<img src="./ClipboardSync.png" alt="ClipboardSync" width="96">
+<img src="./ClipboardSync.png" alt="ClipboardSync">
 
 ## 主な機能
 
